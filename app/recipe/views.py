@@ -21,18 +21,17 @@ class BaseRecipeAttrViewSet(viewsets.GenericViewSet,
         return [int(str_id) for str_id in qs.split(',')]
 
     def get_queryset(self):
-        """Return objects for the current authenticated user only"""
-        tags = self.request.query_params.get('tags')
-        ingredients = self.request.query_params.get('ingredients')
+        """Return objects for current user"""
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )
         queryset = self.queryset
-        if tags:
-            tag_ids = self._params_to_ints(tags)
-            queryset = queryset.filter(tags__in=tag_ids).distinct()
-        if ingredients:
-            ingredient_ids = self._params_to_ints(ingredients)
-            queryset = queryset.filter(ingredients__in=ingredient_ids).distinct()
+        if assigned_only:
+            queryset = queryset.filter(recipe__isnull=False)
 
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        return queryset.filter(
+            user=self.request.user
+        ).order_by('-name').distinct()
 
     def perform_create(self, serializer):
         """Create a new ingredient"""
