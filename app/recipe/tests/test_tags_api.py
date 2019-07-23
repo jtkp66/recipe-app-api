@@ -9,10 +9,12 @@ from core.models import Tag, Recipe
 
 from recipe.serializers import TagSerializer
 
+
 TAGS_URL = reverse('recipe:tag-list')
 
+
 class PublicTagsApiTests(TestCase):
-    """Test the publically available tags API"""
+    """Test thje publicly available tags API"""
 
     def setUp(self):
         self.client = APIClient()
@@ -50,7 +52,7 @@ class PrivateTagsApiTests(TestCase):
     def test_tags_limited_to_user(self):
         """Test that tags returned are for the authenticated user"""
         user2 = get_user_model().objects.create_user(
-            'other@webappdev.com',
+            'other@londonappdev.com',
             'testpass'
         )
         Tag.objects.create(user=user2, name='Fruity')
@@ -63,7 +65,7 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(res.data[0]['name'], tag.name)
 
     def test_create_tag_successful(self):
-        """Test creatig a new tag"""
+        """Test creating a new tag"""
         payload = {'name': 'Test tag'}
         self.client.post(TAGS_URL, payload)
 
@@ -88,7 +90,7 @@ class PrivateTagsApiTests(TestCase):
             title='Coriander eggs on toast',
             time_minutes=10,
             price=5.00,
-            user=self.user,
+            user=self.user
         )
         recipe.tags.add(tag1)
 
@@ -102,6 +104,7 @@ class PrivateTagsApiTests(TestCase):
     def test_retrieve_tags_assigned_unique(self):
         """Test filtering tags by assigned returns unique items"""
         tag = Tag.objects.create(user=self.user, name='Breakfast')
+        Tag.objects.create(user=self.user, name='Lunch')
         recipe1 = Recipe.objects.create(
             title='Pancakes',
             time_minutes=5,
